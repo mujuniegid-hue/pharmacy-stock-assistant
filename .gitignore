@@ -1,0 +1,9 @@
+# Secrets
+.env
+
+# Virtual environment (big, and the client can recreate it)
+venv/
+
+# Python junk
+__pycache__/
+*.pyc
