@@ -32,6 +32,8 @@ note = build_stock_note("Do you have amoxicillin?", stock)
 check("note says out of stock", "out of stock" in note)
 note = build_stock_note("Do you sell insulin?", stock)
 check("note refuses to guess when nothing matches", "Do not state a price" in note)
+check("generic word alone does not match", find_items("Do you have ibuprofen tablets?", stock) == [])
+check("generic word plus real name still matches", len(find_items("Do you have paracetamol tablet?", stock)) == 1)
 
 print(describe(stock[0]))
 print()

@@ -7,6 +7,7 @@ IGNORE_WORDS = {
     "of", "for", "what", "does", "cost", "are", "there", "any", "in", "stock",
     "sell", "i", "need", "want", "can", "get", "your", "price", "many",
     "available", "please", "me", "my", "to", "on", "with",
+    "tablet", "tablets", "capsule", "capsules",
 }
 
 
