@@ -7,3 +7,4 @@ venv/
 # Python junk
 __pycache__/
 *.pyc
+test_run.txt
