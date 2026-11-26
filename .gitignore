@@ -8,3 +8,5 @@ venv/
 __pycache__/
 *.pyc
 test_run.txt
+
+DELIVERY_CHECKLIST.md

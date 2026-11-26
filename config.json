@@ -4,5 +4,5 @@
   "exit_word": "quit",
   "goodbye_message": "Goodbye!",
   "error_message": "Sorry, something went wrong. Please try again.",
-  "show_debug": true
+  "show_debug": false
 }
