@@ -69,6 +69,16 @@ check("note says out of stock", "out of stock" in note)
 note = build_stock_note("do you have ibuprofen?", TEST_STOCK)
 check("note refuses to guess when nothing matches",
       "No entry" in note and "UGX" not in note)
+check("no-match note gives the exact sentence for staff",
+      "please ask our staff to check the shelves or stock system" in note)
+
+note = build_stock_note("do you have 500mg?", TEST_STOCK)
+check("several matches: note asks for each one to be listed",
+      "each one" in note)
+
+note = build_stock_note("do you have hand cream?", TEST_STOCK)
+check("note tells the assistant to check it is the same product",
+      "same product" in note)
 
 # --- best match (shared words) ---
 check("specific question returns only the best match",

@@ -103,9 +103,12 @@ def build_stock_note(question, stock, remembered=None):
     if not matches:
         return (
             "STOCK CHECK: No entry in the pharmacy's stock list matched this question. "
-            "Do not state any price or availability for any medicine. "
-            "If the customer is asking whether we have a medicine or what it costs, "
-            "say you cannot confirm and ask them to please confirm with our staff."
+            "If the customer is asking whether we have a medicine, what it costs, or "
+            "whether it is in stock, do not state any price or availability. Reply with "
+            "this sentence: 'I cannot confirm that, so please ask our staff to check "
+            "the shelves or stock system.' "
+            "If the question is about something else (opening hours, services, "
+            "prescriptions), ignore this note and answer normally."
         )
 
     lines = "\n".join("- " + describe(row) for row in matches)
@@ -113,5 +116,11 @@ def build_stock_note(question, stock, remembered=None):
         "STOCK CHECK: These entries from the pharmacy's own stock list match the "
         "customer's question:\n" + lines + "\n"
         "State price and availability ONLY from these entries, and always mention the "
-        "'last checked' date. Do not suggest alternative medicines or give medical advice."
+        "'last checked' date. If more than one entry is listed, give the price and "
+        "availability of each one. Check that each entry is the same product the "
+        "customer asked for: if the customer named a form, strength or type (for "
+        "example cream, syrup or 100mg) that is not in the entry name, do not say that "
+        "product is in stock; say which listed item you found and that staff must "
+        "confirm whether it is the one they want. "
+        "Do not suggest alternative medicines or give medical advice."
     )
