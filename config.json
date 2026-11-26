@@ -1,5 +1,5 @@
 {
-  "business_name": "your pharmacy's name",
+  "business_name": "HamTech Pharmacy",
   "model": "gemini-3.5-flash-lite",
   "exit_word": "quit",
   "goodbye_message": "Goodbye!",
