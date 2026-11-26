@@ -7,6 +7,7 @@ IGNORE_WORDS = {
     "of", "for", "what", "does", "cost", "are", "there", "any", "in", "stock",
     "sell", "i", "need", "want", "can", "get", "your", "price", "many",
     "available", "please", "me", "my", "to", "on", "with",
+    "that", "this", "one", "them", "those", "these",
     "tablet", "tablets", "capsule", "capsules",
 }
 
@@ -47,20 +48,38 @@ def load_stock(path="stock.csv"):
         raise SystemExit(f"No usable items found in {path}.")
     return good_rows
 
+
 def split_words(text):
     """Turn text into a list of lowercase words, with punctuation removed."""
     return re.findall(r"[a-z0-9]+", text.lower())
 
 
+def has_item_words(question):
+    """True if the question has at least one word that could name an item."""
+    return any(w not in IGNORE_WORDS for w in split_words(question))
+
+
 def find_items(question, stock):
-    """Return the stock rows whose item name shares a word with the question."""
+    """Return the best-matching stock rows for the question.
+
+    Each item is scored by how many meaningful words it shares with the
+    question. Only the highest-scoring items are returned. A tie returns
+    all tied items, because the question is then genuinely ambiguous.
+    """
     question_words = {w for w in split_words(question) if w not in IGNORE_WORDS}
-    matches = []
+
+    scored = []
     for row in stock:
         item_words = set(split_words(row["item"]))
-        if question_words & item_words:
-            matches.append(row)
-    return matches
+        score = len(question_words & item_words)
+        if score > 0:
+            scored.append((score, row))
+
+    if not scored:
+        return []
+
+    best_score = max(score for score, row in scored)
+    return [row for score, row in scored if score == best_score]
 
 
 def describe(row):
@@ -70,17 +89,25 @@ def describe(row):
     return f'{row["item"]}: UGX {price:,}, {status} (last checked {row["last_updated"]})'
 
 
-def build_stock_note(question, stock):
-    """Create the extra instructions the assistant receives for this one question."""
-    matches = find_items(question, stock)
+def build_stock_note(question, stock, remembered=None):
+    """Create the extra instructions the assistant receives for this one question.
+
+    remembered: the items found for an earlier question. It is used only when
+    the new question names no item (for example "how much is it?").
+    """
+    if has_item_words(question):
+        matches = find_items(question, stock)
+    else:
+        matches = remembered or []
+
     if not matches:
         return (
             "STOCK CHECK: No entry in the pharmacy's stock list matched this question. "
-            "Do not state a price or availability for any medicine unless it already "
-            "appears earlier in this conversation. If the customer is asking whether "
-            "we have a medicine or what it costs, say you cannot confirm and ask them "
-            "to please confirm with our staff."
+            "Do not state any price or availability for any medicine. "
+            "If the customer is asking whether we have a medicine or what it costs, "
+            "say you cannot confirm and ask them to please confirm with our staff."
         )
+
     lines = "\n".join("- " + describe(row) for row in matches)
     return (
         "STOCK CHECK: These entries from the pharmacy's own stock list match the "
