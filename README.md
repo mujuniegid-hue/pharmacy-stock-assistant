@@ -1,84 +1,115 @@
 # Pharmacy Stock Assistant
 
-A command-line chat assistant for a pharmacy. It answers routine questions (opening hours, services) and, new in this version, **price and stock questions answered only from the pharmacy's own stock list**. If an item is not on the list, it does not guess: it asks the customer to confirm with staff.
+A helper that answers customers' routine questions: opening hours, services, prescriptions, and **prices and stock for items on your own stock list**. If an item is not on your list, it does not guess. It asks the customer to check with your staff.
 
-Built with Python and the Google Gemini API for AI Masterclass 2, Week 7: Building the Core. This is a practice client project. It is a copy of `pharmacy-assistant-client-package`, which is kept unchanged as a reference.
+It does **not** give medical advice or dosage instructions. It sends those questions to the pharmacist.
 
-## What I built
+**IMPORTANT:** The prices, stock, opening hours and services in this package are made-up examples. Before real use, the pharmacy owner must replace them with real, checked information (see Part 3 and Part 4).
 
-The core feature is a **stock lookup**:
+---
 
-1. The pharmacy keeps its items in `stock.csv` (item, price in UGX, in stock yes/no, date last checked).
-2. When a customer asks a question, `stock.py` finds matching items by name.
-3. The matching entries are sent to the AI with that one question, with the instruction to answer only from them.
-4. If nothing matches, the AI is told not to state any price or availability, and to ask the customer to confirm with staff.
+## What is in this folder
 
-The assistant still refuses to give medical advice.
+| File | What it is for |
+|------|----------------|
+| `start.bat` | Double-click this to start the assistant |
+| `stock.csv` | Your list of items, prices and whether they are in stock |
+| `system_prompt.txt` | Your opening hours, services and prescription rules |
+| `config.json` | Your pharmacy name and a few messages |
+| `.env` | A private key that lets the assistant work. Never share it |
+| Other files | Used by the program. You do not need to open them |
 
-## Files
+---
 
-- `chat.py`: the assistant (runs in the terminal)
-- `stock.py`: loads and checks `stock.csv`, finds matching items
-- `stock.csv`: the stock list (the pharmacy edits this in Excel or Google Sheets)
-- `config.json`: business name, model name and messages
-- `system_prompt.txt`: the pharmacy's hours, services and rules
-- `test_stock.py`, `test_bad_data.py`: automatic tests
-- `.env.example`: template for the API key
+## Part 1: First-time setup (done once, by the person installing it)
 
-## How to run
-
-1. Install Python 3.10 or newer.
-2. Create and activate a virtual environment, then install the libraries:
+1. Install Python (version 3.10 or newer) from python.org. During installation, tick the box "Add Python to PATH".
+2. Open the project folder. Click the folder's address bar, type `powershell`, and press Enter. A blue window opens.
+3. Type each line below, one at a time, pressing Enter after each. Wait for each to finish.
 
    ```
    python -m venv venv
-   venv\Scripts\Activate.ps1
-   pip install -r requirements.txt
+   venv\Scripts\python.exe -m pip install -r requirements.txt
    ```
 
-3. Copy `.env.example` to `.env` and paste your Gemini API key after `GEMINI_API_KEY=`. Never share or upload this file.
-4. Edit `config.json`, `system_prompt.txt` and `stock.csv` for your pharmacy.
-5. Start the assistant:
+4. In the folder, make a copy of the file `.env.example` and name the copy `.env`.
+5. Open `.env` in Notepad. After `GEMINI_API_KEY=`, paste your key. Save and close the file. Do not share this file or upload it anywhere.
+6. Open `config.json` in Notepad. Change `business_name` to your pharmacy's name. Save and close.
+7. Double-click `start.bat`. If you see a welcome line with your pharmacy's name, setup worked. Type `quit` to close it.
 
-   ```
-   python chat.py
-   ```
+If step 7 shows an error mentioning "model not found", the model name in `config.json` is out of date. Ask your developer to update it.
 
-   Type your question, or `quit` to exit.
+---
 
-If you see a "model not found" error, the model name in `config.json` is out of date. Model names change over time, so check Google's current model list.
+## Part 2: Using the assistant every day
 
-## Stock file format
+1. Double-click `start.bat`. A black window opens.
+2. Wait for the welcome line.
+3. Type your question after `You:` and press Enter. Example: `how much is paracetamol?`
+4. Read the answer after `Bot:`.
+5. To finish, type `quit` and press Enter.
 
-The first line must be exactly:
+You can ask a follow-up straight after, such as "is it in stock?" or "how much is it?". The assistant remembers the last item you asked about. If the last question was about an item that is not on your list, it will not guess a price.
 
-```
-item,price_ugx,in_stock,last_updated
-```
+---
 
-- `price_ugx`: plain number only, for example `1500` (not `1,500` or `1500 UGX`)
-- `in_stock`: `yes` or `no`
-- `last_updated`: a date such as `2026-11-25`
+## Part 3: Updating prices and stock
 
-Rows that break these rules are skipped with a warning when the program starts. The assistant restarts to pick up edits to the file.
+Do this whenever a price or stock level changes. You do not need to restart the assistant. The next question picks up your changes.
 
-## Tests
+1. Open `stock.csv` in Excel or Google Sheets.
+2. Change what you need. Each row is one item. The columns are:
+   - `item`: the name customers use, for example `Paracetamol 500mg (10 tablets)`
+   - `price_ugx`: the price as a plain number, for example `1500`. Do not write `1,500` or `1500 UGX`
+   - `in_stock`: write exactly `yes` or `no`
+   - `last_updated`: the date you checked, for example `2026-11-26`
+3. Do not change or delete the first row (`item,price_ugx,in_stock,last_updated`).
+4. Save the file as **CSV (Comma delimited)**, with the same name `stock.csv`, in the same folder. If Excel asks "Keep using this format?", choose **Yes**.
 
-```
-python test_stock.py
-python test_bad_data.py
-```
+Tips:
+- The assistant tells customers the "last checked" date. Keep it honest and up to date.
+- If you add a new item, give it a clear name. The assistant finds items by the words in the name.
+- If a row has a mistake, the assistant skips that row and shows a warning when it starts. Look at the black window and fix the row.
 
-Both end with `ALL PASSED`. I also ran real conversations covering a price question, an out-of-stock item, an unknown item, opening hours, a medical advice question, a follow-up question and a misspelled medicine name. Every answer was safe: the assistant either answered from the stock list or asked the customer to confirm with staff.
+---
 
-## Known limits
+## Part 4: Changing opening hours, services or the pharmacy name
 
-- Matching is by whole words from the item name. A misspelled medicine name does not match, so the assistant asks the customer to confirm with staff. This is deliberate: no answer is safer than a wrong one.
-- A follow-up like "how much is it?" has no item name to search for. In my test the assistant said it could not confirm the price and asked the customer to check with staff, even though the price had been given in the previous answer.
-- A word shared by several items (for example "500mg") returns all of them.
-- The stock list is read once when the program starts, so the assistant must be restarted after the file is edited.
-- The assistant gives no medical advice and cannot check physical shelves.
+1. Close the assistant if it is open (type `quit`).
+2. To change hours, services or prescription rules: open `system_prompt.txt` in Notepad, edit the text, and save.
+3. To change the pharmacy name: open `config.json` in Notepad, change `business_name`, and save.
+4. Double-click `start.bat` again. Changes here only take effect after a restart.
 
-## Important
+Only change the words. Do not delete the line that contains `{business_name}`.
 
-All prices, stock levels, hours and services in this project are **made-up placeholders** for demonstration. A pharmacy owner must supply and verify the real information before real use.
+---
+
+## Part 5: If something goes wrong
+
+| What you see | What to do |
+|--------------|------------|
+| `Cannot find stock.csv` | The stock list is missing or renamed. Put a file called `stock.csv` back in the same folder as `start.bat` |
+| `Stock file problem: ...` | The first row of `stock.csv` was changed. Put it back to `item,price_ugx,in_stock,last_updated` and save. The assistant keeps using the last good list until then |
+| `Warning: skipping line ...` | One row has a mistake (such as a price with a comma). Fix that row and save |
+| `Sorry, something went wrong. Please try again.` | The assistant could not reach the internet or the service was busy. Wait a minute and ask again |
+| The assistant says "I cannot confirm that, so please ask our staff" | This is normal. The item is not on your list, or the assistant is not sure. A member of staff should check |
+| The window closes immediately | Open `start.bat` again. If it keeps happening, contact the person who set it up |
+
+---
+
+## What the assistant cannot do
+
+- It only knows what is in your `stock.csv` and `system_prompt.txt`. It cannot see your shelves.
+- It needs an internet connection to answer.
+- If a customer misspells a medicine name, or uses a brand name that is not on your list, it will usually say it cannot confirm. This is on purpose: no answer is safer than a wrong one.
+- If a customer asks for a type or size that is not on your list (for example "hand cream" when you only list hand sanitizer), it may mention the item it found. Staff should confirm.
+- It does not give medical advice. Please keep a member of staff available for customers who need the pharmacist.
+- Prices and stock are only as correct as your `stock.csv`.
+
+---
+
+## Getting help
+
+Set up and supported by: **Egidio K Ham**
+Phone / WhatsApp: **0785376493**
+Email: **mujunieggid@gmail.com**
